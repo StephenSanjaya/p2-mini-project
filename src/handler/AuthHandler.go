@@ -36,8 +36,10 @@ func (as *AuthService) RegisterHandler(c *gin.Context) {
 
 	user.Password = ""
 
-	httputil.NewSuccess(c, http.StatusCreated, "registration successful", user)
-
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "registration successful",
+		"user":    user,
+	})
 }
 
 func (as *AuthService) LoginHandler(c *gin.Context) {
@@ -64,8 +66,9 @@ func (as *AuthService) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	httputil.NewSuccess(c, http.StatusOK, "login successful")
-
+	c.JSON(http.StatusOK, gin.H{
+		"message": "login successful",
+	})
 }
 
 func HashPassword(password string) string {
