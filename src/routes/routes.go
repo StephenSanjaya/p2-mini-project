@@ -20,6 +20,7 @@ func Routes(db *gorm.DB) {
 		users := api.Group("/users")
 		{
 			users.POST("/register", authService.RegisterHandler)
+			users.POST("/login", authService.LoginHandler)
 		}
 	}
 
