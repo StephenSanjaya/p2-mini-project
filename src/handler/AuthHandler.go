@@ -2,9 +2,13 @@ package handler
 
 import (
 	"net/http"
+	"os"
 	"p2-mini-project/src/dto"
+	"p2-mini-project/src/entity"
 	"p2-mini-project/src/httputil"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -50,7 +54,7 @@ func (as *AuthService) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	user := new(dto.User)
+	user := new(entity.User)
 	res := as.db.Where("email = ?", login.Email).First(&user)
 	if res.Error == gorm.ErrRecordNotFound {
 		c.Error(httputil.NewError(http.StatusNotFound, "LoginHandler: email not found", res.Error))
@@ -66,8 +70,15 @@ func (as *AuthService) LoginHandler(c *gin.Context) {
 		return
 	}
 
+	tokenString, err := CreateJWT(user)
+	if err != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "failed create token", err))
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "login successful",
+		"token":   tokenString,
 	})
 }
 
@@ -81,4 +92,24 @@ func CheckHashPassword(hashedPass string, password string) error {
 		return err
 	}
 	return nil
+}
+
+func CreateJWT(user *entity.User) (string, error) {
+	claims := jwt.MapClaims{
+		"fullname": user.Fullname,
+		"user_id":  user.UserID,
+		"role":     user.Role,
+		"exp":      time.Now().Add(time.Hour * 1).Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	secret_token := []byte(os.Getenv("JWT"))
+
+	tokenString, err := token.SignedString(secret_token)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
