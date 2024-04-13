@@ -28,6 +28,7 @@ func Routes(db *gorm.DB) {
 		{
 			cars.GET("", carService.GetAllCars)
 			cars.GET("/:category_id", carService.GetAllCarsByCategory)
+			cars.POST("/rental", carService.RentalCar)
 		}
 	}
 

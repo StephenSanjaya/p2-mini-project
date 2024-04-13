@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"p2-mini-project/src/dto"
 	"p2-mini-project/src/entity"
 	"p2-mini-project/src/httputil"
 
@@ -49,5 +50,25 @@ func (cs *CarService) GetAllCarsByCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success get all cars by category",
 		"cars":    cars,
+	})
+}
+
+func (cs *CarService) RentalCar(c *gin.Context) {
+	rental := new(dto.Rental)
+
+	if err := c.ShouldBindJSON(&rental); err != nil {
+		c.Error(httputil.NewError(http.StatusBadRequest, "RentalCar: invalid body request", err))
+		return
+	}
+	rental.UserID = c.GetInt("user_id")
+
+	if res := cs.db.Create(&rental); res.Error != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "RentalCar: failed to rental car", res.Error))
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message":    "success rental a car",
+		"rental_car": rental,
 	})
 }
