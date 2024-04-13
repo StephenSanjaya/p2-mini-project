@@ -76,6 +76,7 @@ func (cs *CarService) RentalCar(c *gin.Context) {
 	rental_details.RentalID = rental.RentalID
 	rental_details.TotalPrice = CalculateTotalPrice(rental, coupon)
 	rental_details.Coupon = coupon
+	rental_details.Status = "pending"
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message":    "success rental a car",
