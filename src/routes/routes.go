@@ -11,6 +11,7 @@ import (
 
 func Routes(db *gorm.DB) {
 	authService := handler.NewAuthService(db)
+	carService := handler.NewCarService(db)
 
 	r := gin.Default()
 	r.Use(middleware.ErrorMiddleware)
@@ -21,6 +22,11 @@ func Routes(db *gorm.DB) {
 		{
 			users.POST("/register", authService.RegisterHandler)
 			users.POST("/login", authService.LoginHandler)
+		}
+		cars := api.Group("/cars")
+		cars.Use(middleware.AuthMiddleware("user"))
+		{
+			cars.GET("", carService.GetAllCars)
 		}
 	}
 
