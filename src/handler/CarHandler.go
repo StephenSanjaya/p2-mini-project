@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"p2-mini-project/src/dto"
 	"p2-mini-project/src/entity"
 	"p2-mini-project/src/httputil"
 
@@ -33,6 +32,8 @@ func (cs *CarService) GetAllCars(c *gin.Context) {
 }
 
 func (cs *CarService) GetAllCarsByCategory(c *gin.Context) {
+	c.Writer.Header().Set("Content-Type", "application/json")
+
 	id := c.Param("category_id")
 
 	cars := new(entity.Car)
@@ -54,7 +55,11 @@ func (cs *CarService) GetAllCarsByCategory(c *gin.Context) {
 }
 
 func (cs *CarService) RentalCar(c *gin.Context) {
-	rental := new(dto.Rental)
+	c.Writer.Header().Set("Content-Type", "application/json")
+
+	coupon := c.Request.URL.Query().Get("coupon")
+
+	rental := new(entity.Rental)
 
 	if err := c.ShouldBindJSON(&rental); err != nil {
 		c.Error(httputil.NewError(http.StatusBadRequest, "RentalCar: invalid body request", err))
@@ -67,8 +72,28 @@ func (cs *CarService) RentalCar(c *gin.Context) {
 		return
 	}
 
+	rental_details := new(entity.RentalDetails)
+	rental_details.RentalID = rental.RentalID
+	rental_details.TotalPrice = CalculateTotalPrice(rental, coupon)
+	rental_details.Coupon = coupon
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message":    "success rental a car",
 		"rental_car": rental,
 	})
+}
+
+func CalculateTotalPrice(r *entity.Rental, coupon string) float64 {
+	total_price := r.Price * float64(r.Quantity)
+
+	switch coupon {
+	case "discount10%":
+		total_price = total_price - (total_price * 0.1)
+	case "discount20%":
+		total_price = total_price - (total_price * 0.2)
+	case "discount30%":
+		total_price = total_price - (total_price * 0.3)
+	}
+
+	return total_price
 }
