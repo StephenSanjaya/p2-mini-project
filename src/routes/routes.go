@@ -27,6 +27,7 @@ func Routes(db *gorm.DB) {
 		cars.Use(middleware.AuthMiddleware("user"))
 		{
 			cars.GET("", carService.GetAllCars)
+			cars.GET("/:category_id", carService.GetAllCarsByCategory)
 		}
 	}
 

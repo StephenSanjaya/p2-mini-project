@@ -30,3 +30,24 @@ func (cs *CarService) GetAllCars(c *gin.Context) {
 		"cars":    cars,
 	})
 }
+
+func (cs *CarService) GetAllCarsByCategory(c *gin.Context) {
+	id := c.Param("category_id")
+
+	cars := new(entity.Car)
+
+	res := cs.db.Where("category_id = ?", id).Find(&cars)
+	if res.Error == gorm.ErrRecordNotFound {
+		c.Error(httputil.NewError(http.StatusNotFound, "GetAllCarsByCategory: cateogry id not found", res.Error))
+		return
+	}
+	if res.Error != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "GetAllCarsByCategory: fail to get all cars by category", res.Error))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success get all cars by category",
+		"cars":    cars,
+	})
+}
