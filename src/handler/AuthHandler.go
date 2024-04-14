@@ -32,6 +32,7 @@ func (as *AuthService) RegisterHandler(c *gin.Context) {
 
 	hashedPassword := HashPassword(user.Password)
 	user.Password = hashedPassword
+	user.Role = "user"
 
 	if res := as.db.Create(&user); res.Error != nil {
 		c.Error(httputil.NewError(http.StatusInternalServerError, "RegisterHandler: register failed", res.Error))
@@ -97,7 +98,7 @@ func CheckHashPassword(hashedPass string, password string) error {
 func CreateJWT(user *entity.User) (string, error) {
 	claims := jwt.MapClaims{
 		"fullname": user.Fullname,
-		"user_id":  user.UserID,
+		"user_id":  user.ID,
 		"role":     user.Role,
 		"exp":      time.Now().Add(time.Hour * 1).Unix(),
 	}
