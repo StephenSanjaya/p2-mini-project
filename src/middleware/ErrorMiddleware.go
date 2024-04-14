@@ -22,5 +22,6 @@ func ErrorMiddleware(c *gin.Context) {
 				"error": err.Error(),
 			})
 		}
+		c.Abort()
 	}
 }
