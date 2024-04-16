@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"p2-mini-project/src/entity"
@@ -27,6 +28,7 @@ func (as *AdminService) CreateNewCar(c *gin.Context) {
 		return
 	}
 
+	car.Status = "available"
 	if res := as.db.Create(&car); res.Error != nil {
 		c.Error(httputil.NewError(http.StatusInternalServerError, "CreateNewCar: failed to create new car", res.Error))
 		return
@@ -51,13 +53,13 @@ func (as *AdminService) UpdateCar(c *gin.Context) {
 	car.ID, _ = strconv.Atoi(car_id)
 
 	res := as.db.Model(&car).Updates(entity.Car{CategoryID: car.CategoryID, Name: car.Name, RentalCostPerDay: car.RentalCostPerDay, Capacity: car.Capacity})
-	if res.RowsAffected == 0 {
-		c.Error(httputil.NewError(http.StatusInternalServerError, "car id not found", res.Error))
+	if res.Error != nil {
+		msg := fmt.Sprintf("UpdateCar: failed to update car with ID [%d]", car.ID)
+		c.Error(httputil.NewError(http.StatusInternalServerError, msg, res.Error))
 		return
 	}
-	if res.Error != nil {
-		msg := fmt.Sprintf("CreateNewCar: failed to update car with ID [%d]", car.ID)
-		c.Error(httputil.NewError(http.StatusInternalServerError, msg, res.Error))
+	if res.RowsAffected == 0 {
+		c.Error(httputil.NewError(http.StatusNotFound, "UpdateCar: car id not found", errors.New("car id not found")))
 		return
 	}
 
@@ -70,21 +72,18 @@ func (as *AdminService) UpdateCar(c *gin.Context) {
 func (as *AdminService) DeleteCar(c *gin.Context) {
 	car_id := c.Param("car_id")
 
-	car := new(entity.Car)
-
 	res := as.db.Delete(&entity.Car{}, car_id)
-	if res.RowsAffected == 0 {
-		c.Error(httputil.NewError(http.StatusInternalServerError, "car id not found", res.Error))
+	if res.Error != nil {
+		msg := fmt.Sprintf("DeleteCar: failed to delete car with ID [%s]", car_id)
+		c.Error(httputil.NewError(http.StatusInternalServerError, msg, res.Error))
 		return
 	}
-	if res.Error != nil {
-		msg := fmt.Sprintf("CreateNewCar: failed to delete car with ID [%d]", car.ID)
-		c.Error(httputil.NewError(http.StatusInternalServerError, msg, res.Error))
+	if res.RowsAffected == 0 {
+		c.Error(httputil.NewError(http.StatusNotFound, "DeleteCar: car id not found", errors.New("car id not found")))
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "success update car with ID: " + car_id,
-		"car":     car,
+		"message": "success delete car with ID: " + car_id,
 	})
 }
