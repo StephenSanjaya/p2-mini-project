@@ -66,3 +66,25 @@ func (as *AdminService) UpdateCar(c *gin.Context) {
 		"car":     car,
 	})
 }
+
+func (as *AdminService) DeleteCar(c *gin.Context) {
+	car_id := c.Param("car_id")
+
+	car := new(entity.Car)
+
+	res := as.db.Delete(&entity.Car{}, car_id)
+	if res.RowsAffected == 0 {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "car id not found", res.Error))
+		return
+	}
+	if res.Error != nil {
+		msg := fmt.Sprintf("CreateNewCar: failed to delete car with ID [%d]", car.ID)
+		c.Error(httputil.NewError(http.StatusInternalServerError, msg, res.Error))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success update car with ID: " + car_id,
+		"car":     car,
+	})
+}
