@@ -185,23 +185,3 @@ func (cs *CarService) ReturnRentalCar(c *gin.Context) {
 		"message": "success return rental car",
 	})
 }
-
-// func GetUserDeposit(cs *CarService, user_id int) (float64, *httputil.HTTPError) {
-// 	deposit := 0.0
-// 	if res := cs.db.Table("users").Select("deposit").Where("user_id = ?", user_id).Scan(&deposit); res.Error != nil {
-// 		return -1, httputil.NewError(http.StatusInternalServerError, "GetUserDeposit: fail to get deposit user", res.Error)
-// 	}
-// 	return deposit, nil
-// }
-
-// func GetPrice(cs *CarService, r *dto.Rental) (float64, *httputil.HTTPError) {
-// 	price := 0.0
-// 	res := cs.db.Model(&entity.Car{}).Select("rental_cost_per_day").Where("car_id = ?", r.CarID).First(&price)
-// 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-// 		return -1, httputil.NewError(http.StatusNotFound, "GetPrice: car id not found", res.Error)
-// 	}
-// 	if res.Error != nil {
-// 		return -1, httputil.NewError(http.StatusInternalServerError, "GetPrice: fail to check stock", res.Error)
-// 	}
-// 	return price, nil
-// }
