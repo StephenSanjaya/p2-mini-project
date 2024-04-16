@@ -12,6 +12,7 @@ import (
 func Routes(db *gorm.DB) {
 	authService := handler.NewAuthService(db)
 	carService := handler.NewCarService(db)
+	adminService := handler.NewAdminService(db)
 
 	r := gin.Default()
 	r.Use(middleware.ErrorMiddleware)
@@ -23,6 +24,11 @@ func Routes(db *gorm.DB) {
 			users.POST("/register", authService.RegisterHandler)
 			users.POST("/login", authService.LoginHandler)
 		}
+		// authUsers := api.Group("/users")
+		// authUsers.Use(middleware.AuthMiddleware("user"))
+		// {
+		// 	authUsers.PUT("/topup")
+		// }
 		cars := api.Group("/cars")
 		cars.Use(middleware.AuthMiddleware("user"))
 		{
@@ -31,6 +37,11 @@ func Routes(db *gorm.DB) {
 			cars.POST("/rental", carService.RentalCar)
 			cars.POST("/pay/:rental_id", carService.PayRentalCar)
 			cars.POST("/return/:rental_id", carService.ReturnRentalCar)
+		}
+		admin := api.Group("/admin/cars")
+		admin.Use(middleware.AuthMiddleware("admin"))
+		{
+			admin.POST("", adminService.CreateNewCar)
 		}
 	}
 
