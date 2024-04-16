@@ -150,6 +150,32 @@ func (cs *CarService) PayRentalCar(c *gin.Context) {
 	})
 }
 
+func (cs *CarService) ReturnRentalCar(c *gin.Context) {
+	rental_id := c.Param("rental_id")
+
+	rental := new(entity.Rental)
+
+	res := cs.db.Where("rental_id = ?", rental_id).First(&rental)
+	if res.Error == gorm.ErrRecordNotFound {
+		c.Error(httputil.NewError(http.StatusNotFound, "ReturnRentalCar: id not found", res.Error))
+		return
+	}
+	if res.Error != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "ReturnRentalCar: failed to get rental", res.Error))
+		return
+	}
+
+	// update status
+	if res := cs.db.Model(&entity.Car{}).Where("car_id = ?", rental.CarID).Update("status", "available"); res.Error != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "ReturnRentalCar: failed to update status", res.Error))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success return rental car",
+	})
+}
+
 func GetUserDeposit(tx *gorm.DB, user_id int) (float64, *httputil.HTTPError) {
 	deposit := 0.0
 	if res := tx.Table("users").Select("deposit").Where("user_id = ?", user_id).Scan(&deposit); res.Error != nil {
