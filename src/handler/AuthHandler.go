@@ -25,7 +25,7 @@ func NewAuthService(db *gorm.DB) *AuthService {
 func (as *AuthService) RegisterHandler(c *gin.Context) {
 	user := new(dto.User)
 
-	if err := c.Bind(&user); err != nil {
+	if err := c.ShouldBindJSON(&user); err != nil {
 		c.Error(httputil.NewError(http.StatusBadRequest, "RegisterHandler: invalid body request", err))
 		return
 	}
