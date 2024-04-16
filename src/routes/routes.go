@@ -42,8 +42,8 @@ func Routes(db *gorm.DB) {
 		admin.Use(middleware.AuthMiddleware("admin"))
 		{
 			admin.POST("", adminService.CreateNewCar)
-			admin.PUT(":car_id", adminService.UpdateCar)
-			admin.DELETE(":car_id", adminService.DeleteCar)
+			admin.PUT("/:car_id", adminService.UpdateCar)
+			admin.DELETE("/:car_id", adminService.DeleteCar)
 		}
 	}
 
