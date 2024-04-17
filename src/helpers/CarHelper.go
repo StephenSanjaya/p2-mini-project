@@ -66,3 +66,10 @@ func CheckCarStatus(cs *gorm.DB, car_id int) *httputil.HTTPError {
 
 	return nil
 }
+
+func CheckAuthorizeUser(curr_user_id, return_user_id int) bool {
+	if curr_user_id != return_user_id {
+		return false
+	}
+	return true
+}
