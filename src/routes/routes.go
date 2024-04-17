@@ -36,7 +36,7 @@ func Routes(db *gorm.DB) {
 			cars.GET("", carService.GetAllCars)
 			cars.GET("/:category_id", carService.GetAllCarsByCategory)
 			cars.POST("/rental", carService.RentalCar)
-			cars.POST("/pay/:rental_id", carService.PayRentalCar)
+			cars.POST("/pay/:payment_id", carService.PayRentalCar)
 			cars.POST("/return/:rental_id", carService.ReturnRentalCar)
 		}
 		admin := api.Group("/admin/cars")
