@@ -1,30 +1,45 @@
 package helpers
 
-// func SendMail(email, subject, content string) {
-// 	m := gomail.NewMessage()
-// 	m.SetHeader("From", "example@hacktiv8.com")
-// 	m.SetHeader("To", email)
-// 	// m.SetAddressHeader("Cc", "dan@example.com", "Dan")
-// 	m.SetHeader("Subject", subject)
-// 	m.SetBody("text/html", content)
+import (
+	"fmt"
+	"os"
+	"strconv"
 
-// 	d := gomail.NewDialer(
-// 		"smtp-example.com",
-// 		587,
-// 		"example",
-// 		"example",
-// 	)
+	"gopkg.in/gomail.v2"
+)
 
-// 	// Send the email to Bob, Cora and Dan.
-// 	if err := d.DialAndSend(m); err != nil {
-// 		panic(err)
-// 	}
-// }
+func SendMail(email, subject, content string) {
+	senderName := os.Getenv("CONFIG_SENDER_NAME")
+	port, _ := strconv.Atoi((os.Getenv("CONFIG_SMTP_PORT")))
+	host := os.Getenv("CONFIG_SMTP_HOST")
+	username := os.Getenv("CONFIG_AUTH_EMAIL")
+	password := os.Getenv("CONFIG_AUTH_PASSWORD")
 
-// func SendSuccessCreateRent(email string) {
-// 	SendMail(
-// 		email,
-// 		"example subject",
-// 		"example content",
-// 	)
-// }
+	m := gomail.NewMessage()
+	m.SetHeader("From", senderName)
+	m.SetHeader("To", email)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", content)
+
+	d := gomail.NewDialer(host, port, username, password)
+
+	if err := d.DialAndSend(m); err != nil {
+		panic(err)
+	}
+}
+
+func SendSuccessRegister(email string) {
+	SendMail(
+		email,
+		"Register success",
+		"Register success",
+	)
+}
+
+func SendSuccessPayment(email string, url string) {
+	SendMail(
+		email,
+		"Payment success",
+		fmt.Sprintf("invoice url: <b>%s<b>", url),
+	)
+}

@@ -36,6 +36,8 @@ func (as *AuthService) RegisterHandler(c *gin.Context) {
 		return
 	}
 
+	helpers.SendSuccessRegister(user.Email)
+
 	user.Password = ""
 
 	c.JSON(http.StatusCreated, gin.H{

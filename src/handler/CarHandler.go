@@ -124,6 +124,8 @@ func (cs *CarService) RentalCar(c *gin.Context) {
 		return
 	}
 
+	helpers.SendSuccessPayment(user.Email, invoiceRes.InvoiceUrl)
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message":    "success rental a car",
 		"rental_car": rentalAndPay,
