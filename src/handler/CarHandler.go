@@ -62,50 +62,79 @@ func (cs *CarService) GetAllCarsByCategory(c *gin.Context) {
 func (cs *CarService) RentalCar(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 
-	rental := new(dto.Rental)
+	rentalAndPay := new(dto.RentalAndPayment)
 
-	if err := c.ShouldBindJSON(&rental); err != nil {
+	if err := c.ShouldBindJSON(&rentalAndPay); err != nil {
 		c.Error(httputil.NewError(http.StatusBadRequest, "RentalCar: invalid body request", err))
 		return
 	}
-	price, err := helpers.GetPrice(cs.db, rental)
+	price, err := helpers.GetPrice(cs.db, &rentalAndPay.Rental)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	err = helpers.CheckCarStatus(cs.db, rental.CarID)
+	err = helpers.CheckCarStatus(cs.db, rentalAndPay.Rental.CarID)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	rental.UserID = int(c.GetFloat64("user_id"))
-	rental.Price = price
+	rentalAndPay.Rental.UserID = int(c.GetFloat64("user_id"))
+	rentalAndPay.Rental.Price = price
 
-	if res := cs.db.Create(&rental); res.Error != nil {
-		c.Error(httputil.NewError(http.StatusInternalServerError, "RentalCar: failed to rental car", res.Error))
+	txErr := cs.db.Transaction(func(tx *gorm.DB) error {
+
+		// create rental
+		if res := tx.Create(&rentalAndPay.Rental); res.Error != nil {
+			return httputil.NewError(http.StatusInternalServerError, "RentalCar: failed to rental car", res.Error)
+		}
+
+		rentalAndPay.Payment.PaymentDate = time.Now().Format("2006-01-02")
+		rentalAndPay.Payment.RentalID = rentalAndPay.Rental.ID
+		rentalAndPay.Payment.PaymentStatus = "pending"
+		rentalAndPay.Payment.TotalPrice = helpers.CalculateTotalPrice(rentalAndPay.Payment.CouponID, &rentalAndPay.Rental)
+
+		// create payment
+		if res := tx.Create(&rentalAndPay.Payment); res.Error != nil {
+			return httputil.NewError(http.StatusInternalServerError, "RentalCar: failed to create payment", res.Error)
+		}
+
+		return nil
+	})
+	if txErr != nil {
+		c.Error(txErr)
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message":    "success rental a car",
-		"rental_car": rental,
+		"rental_car": rentalAndPay,
 	})
 }
 
 func (cs *CarService) PayRentalCar(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 
-	payment := new(dto.Payment)
-	rental_id := c.Param("rental_id")
+	payment_id := c.Param("payment_id")
 
-	if err := c.ShouldBindJSON(&payment); err != nil {
-		c.Error(httputil.NewError(http.StatusBadRequest, "PayRentalCar: invalid body request", err))
+	payment := new(dto.Payment)
+	res := cs.db.Where("payment_id = ?", payment_id).First(&payment)
+	if res.Error == gorm.ErrRecordNotFound {
+		c.Error(httputil.NewError(http.StatusNotFound, "PayRentalCar: payment id not found", res.Error))
+		return
+	}
+	if res.Error != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "PayRentalCar: failed to get rental", res.Error))
+		return
+	}
+
+	if payment.PaymentStatus != "pending" {
+		c.Error(httputil.NewError(http.StatusBadRequest, "PayRentalCar: already paid", errors.New("payment status already settlement")))
 		return
 	}
 
 	rental := new(dto.Rental)
-	res := cs.db.Where("rental_id = ?", rental_id).First(&rental)
+	res = cs.db.Where("rental_id = ?", payment.RentalID).First(&rental)
 	if res.Error == gorm.ErrRecordNotFound {
 		c.Error(httputil.NewError(http.StatusNotFound, "PayRentalCar: rental id not found", res.Error))
 		return
@@ -121,19 +150,12 @@ func (cs *CarService) PayRentalCar(c *gin.Context) {
 		return
 	}
 
-	payment.PaymentDate = time.Now().Format("2006-01-02")
-	// payment.TotalPrice = CalculateTotalPrice(payment, rental)
-	payment.TotalPrice = helpers.CalculateTotalPrice(payment, rental)
-	payment.RentalID = rental.ID
-	payment.PaymentStatus = "settlement"
-
-	// check rental cost
-	// currDeposit, err := GetUserDeposit(cs, int(c.GetFloat64("user_id")))
 	currDeposit, err := helpers.GetUserDeposit(cs.db, int(c.GetFloat64("user_id")))
 	if err != nil {
 		c.Error(err)
 		return
 	}
+	// check balance and rental cost
 	if currDeposit < payment.TotalPrice {
 		paymentError := fmt.Sprintf("your deposit is %.2f while total payment is %.2f", currDeposit, payment.TotalPrice)
 		c.Error(httputil.NewError(http.StatusBadRequest, "PayRentalCar: your deposit is not enough", errors.New(paymentError)))
@@ -148,14 +170,14 @@ func (cs *CarService) PayRentalCar(c *gin.Context) {
 			return httputil.NewError(http.StatusInternalServerError, "PayRentalCar: failed to update deposit", res.Error)
 		}
 
-		// create payment
-		if res := tx.Create(&payment); res.Error != nil {
-			return httputil.NewError(http.StatusInternalServerError, "PayRentalCar: failed to pay rental car", res.Error)
+		// update car status
+		if res := tx.Model(&entity.Car{}).Where("car_id = ?", rental.CarID).Update("status", "rented"); res.Error != nil {
+			return httputil.NewError(http.StatusInternalServerError, "PayRentalCar: failed to update car status", res.Error)
 		}
 
-		// update status
-		if res := tx.Model(&entity.Car{}).Where("car_id = ?", rental.CarID).Update("status", "rented"); res.Error != nil {
-			return httputil.NewError(http.StatusInternalServerError, "PayRentalCar: failed to update status", res.Error)
+		// update payment status
+		if res := tx.Model(&payment).Where("payment_id = ? ", payment_id).Update("payment_status", "settlement"); res.Error != nil {
+			return httputil.NewError(http.StatusInternalServerError, "PayRentalCar: failed to update payment status", res.Error)
 		}
 
 		return nil
@@ -189,6 +211,16 @@ func (cs *CarService) ReturnRentalCar(c *gin.Context) {
 	isLoginUser := helpers.CheckAuthorizeUser(int(c.GetFloat64("user_id")), rental.UserID)
 	if !isLoginUser {
 		c.Error(httputil.NewError(http.StatusUnauthorized, "ReturnRentalCar: failed to return rental car", errors.New("only authorize user can do this action")))
+		return
+	}
+
+	paymentStatus := ""
+	if res = cs.db.Model(&entity.Payment{}).Select("payment_status").Where("rental_id = ?", rental.ID).First(&paymentStatus); res.Error != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "ReturnRentalCar: failed to get payment status", res.Error))
+		return
+	}
+	if paymentStatus != "pending" {
+		c.Error(httputil.NewError(http.StatusBadRequest, "ReturnRentalCar: already paid", errors.New("payment status already settlement")))
 		return
 	}
 
