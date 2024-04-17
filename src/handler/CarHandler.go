@@ -73,6 +73,11 @@ func (cs *CarService) RentalCar(c *gin.Context) {
 		c.Error(err)
 		return
 	}
+	err = helpers.CheckCarStatus(cs.db, rental.CarID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
 
 	rental.UserID = int(c.GetFloat64("user_id"))
 	rental.Price = price

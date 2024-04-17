@@ -54,3 +54,15 @@ func GetUserDeposit(cs *gorm.DB, user_id int) (float64, *httputil.HTTPError) {
 	}
 	return deposit, nil
 }
+
+func CheckCarStatus(cs *gorm.DB, car_id int) *httputil.HTTPError {
+	status := ""
+	if res := cs.Model(&entity.Car{}).Where("car_id = ?", car_id).Select("status").First(&status); res.Error != nil {
+		return httputil.NewError(http.StatusInternalServerError, "CheckCarStatus: failed to check car status", res.Error)
+	}
+	if status == "rented" {
+		return httputil.NewError(http.StatusInternalServerError, "CheckCarStatus: car is rented", errors.New("can't rental car, status is rented"))
+	}
+
+	return nil
+}
