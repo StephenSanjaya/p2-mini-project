@@ -12,16 +12,16 @@ import (
 	"gorm.io/gorm"
 )
 
-func CalculateTotalPrice(p *dto.Payment, r *dto.Rental) float64 {
+func CalculateTotalPrice(coupon_id int, r *dto.Rental) float64 {
 
-	returnDate, _ := time.Parse(time.RFC3339, r.ReturnDate)
-	rentalDate, _ := time.Parse(time.RFC3339, r.RentalDate)
+	returnDate, _ := time.Parse("2006-01-02", r.ReturnDate)
+	rentalDate, _ := time.Parse("2006-01-02", r.RentalDate)
 
 	diffDay := int(returnDate.Sub(rentalDate).Hours() / 24)
 
 	total_price := (r.Price * float64(diffDay))
 
-	switch p.CouponID {
+	switch coupon_id {
 	case 1:
 		total_price = total_price - (total_price * 0.1)
 	case 2:
@@ -68,8 +68,5 @@ func CheckCarStatus(cs *gorm.DB, car_id int) *httputil.HTTPError {
 }
 
 func CheckAuthorizeUser(curr_user_id, return_user_id int) bool {
-	if curr_user_id != return_user_id {
-		return false
-	}
-	return true
+	return curr_user_id == return_user_id
 }
