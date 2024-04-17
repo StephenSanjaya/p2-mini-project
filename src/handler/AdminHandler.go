@@ -87,3 +87,18 @@ func (as *AdminService) DeleteCar(c *gin.Context) {
 		"message": "success delete car with ID: " + car_id,
 	})
 }
+
+func (as *AdminService) GetAllUsers(c *gin.Context) {
+	users := new([]entity.Car)
+
+	res := as.db.Find(&users)
+	if res.Error != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "GetAllUsers: failed to get all users", res.Error))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success get all users",
+		"users":   users,
+	})
+}
