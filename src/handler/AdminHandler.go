@@ -90,9 +90,9 @@ func (as *AdminService) DeleteCar(c *gin.Context) {
 }
 
 func (as *AdminService) GetAllUsers(c *gin.Context) {
-	users := new([]entity.Car)
+	users := new([]entity.User)
 
-	res := as.db.Find(&users)
+	res := as.db.Omit("password").Find(&users)
 	if res.Error != nil {
 		c.Error(httputil.NewError(http.StatusInternalServerError, "GetAllUsers: failed to get all users", res.Error))
 		return
@@ -123,7 +123,7 @@ func (as *AdminService) GetRentalHistory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":        "success get all users",
+		"message":        "success get rental history",
 		"rental_history": history,
 	})
 }
