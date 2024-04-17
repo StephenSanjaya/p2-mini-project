@@ -12,6 +12,16 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetCarByID(db *gorm.DB, car_id int) (*entity.Car, *httputil.HTTPError) {
+	car := new(entity.Car)
+
+	if res := db.Where("car_id = ?", car_id).First(&car); res.Error != nil {
+		return nil, httputil.NewError(http.StatusInternalServerError, "GetCarByID: failed get car by car id", res.Error)
+	}
+
+	return car, nil
+}
+
 func CalculateTotalPrice(coupon_id int, r *dto.Rental) float64 {
 
 	returnDate, _ := time.Parse("2006-01-02", r.ReturnDate)
