@@ -2,15 +2,12 @@ package handler
 
 import (
 	"net/http"
-	"os"
 	"p2-mini-project/src/dto"
 	"p2-mini-project/src/entity"
+	"p2-mini-project/src/helpers"
 	"p2-mini-project/src/httputil"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -30,7 +27,7 @@ func (as *AuthService) RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	hashedPassword := HashPassword(user.Password)
+	hashedPassword := helpers.HashPassword(user.Password)
 	user.Password = hashedPassword
 	user.Role = "user"
 
@@ -66,12 +63,12 @@ func (as *AuthService) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	if err := CheckHashPassword(user.Password, login.Password); err != nil {
+	if err := helpers.CheckHashPassword(user.Password, login.Password); err != nil {
 		c.Error(httputil.NewError(http.StatusBadRequest, "LoginHandler: password not match", err))
 		return
 	}
 
-	tokenString, err := CreateJWT(user)
+	tokenString, err := helpers.CreateJWT(user)
 	if err != nil {
 		c.Error(httputil.NewError(http.StatusInternalServerError, "failed create token", err))
 		return
@@ -81,36 +78,4 @@ func (as *AuthService) LoginHandler(c *gin.Context) {
 		"message": "login successful",
 		"token":   tokenString,
 	})
-}
-
-func HashPassword(password string) string {
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(hashedPassword)
-}
-
-func CheckHashPassword(hashedPass string, password string) error {
-	if err := bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(password)); err != nil {
-		return err
-	}
-	return nil
-}
-
-func CreateJWT(user *entity.User) (string, error) {
-	claims := jwt.MapClaims{
-		"fullname": user.Fullname,
-		"user_id":  user.ID,
-		"role":     user.Role,
-		"exp":      time.Now().Add(time.Hour * 1).Unix(),
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	secret_token := []byte(os.Getenv("JWT"))
-
-	tokenString, err := token.SignedString(secret_token)
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
 }
