@@ -45,6 +45,7 @@ func Routes(db *gorm.DB) {
 			admin.PUT("/:car_id", adminService.UpdateCar)
 			admin.DELETE("/:car_id", adminService.DeleteCar)
 			admin.GET("/users", adminService.GetAllUsers)
+			admin.GET("/rental-history", adminService.GetRentalHistory)
 		}
 	}
 

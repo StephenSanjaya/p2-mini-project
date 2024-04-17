@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"p2-mini-project/src/dto"
 	"p2-mini-project/src/entity"
 	"p2-mini-project/src/httputil"
 	"strconv"
@@ -100,5 +101,29 @@ func (as *AdminService) GetAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success get all users",
 		"users":   users,
+	})
+}
+
+func (as *AdminService) GetRentalHistory(c *gin.Context) {
+	history := new([]dto.RentalHistory)
+
+	rows, err := as.db.Raw("select r.rental_id, r.rental_date, r.return_date, u.user_id, u.fullname, u.address, c.car_id, c.name, p.total_price from rentals r join users u on r.user_id = u.user_id join cars c on r.car_id = c.car_id join payments p on r.rental_id = p.rental_id").Rows()
+	if err != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "GetRentalHistory: failed to query", err))
+		return
+	}
+	for rows.Next() {
+		var h dto.RentalHistory
+		err := rows.Scan(&h.RentalID, &h.RentalDate, &h.ReturnDate, &h.UserID, &h.User.Fullname, &h.User.Address, &h.CarID, &h.Car.Name, &h.TotalPrice)
+		if err != nil {
+			c.Error(httputil.NewError(http.StatusInternalServerError, "GetRentalHistory: failed to scan query", err))
+			return
+		}
+		*history = append(*history, h)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":        "success get all users",
+		"rental_history": history,
 	})
 }
