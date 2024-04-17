@@ -41,7 +41,14 @@ func (us *UserService) TopUp(c *gin.Context) {
 		c.Error(httputil.NewError(http.StatusInternalServerError, "TopUp: failed to top up", res.Error))
 	}
 
+	invoiceRes, errInvoice := helpers.CreateInvoiceTopUp(user, topup.Amount)
+	if errInvoice != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "TopUp: failed to create invoice", errInvoice))
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success top up",
+		"invoice": invoiceRes,
 	})
 }
