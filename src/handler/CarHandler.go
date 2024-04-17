@@ -115,6 +115,12 @@ func (cs *CarService) PayRentalCar(c *gin.Context) {
 		return
 	}
 
+	isLoginUser := helpers.CheckAuthorizeUser(int(c.GetFloat64("user_id")), rental.UserID)
+	if !isLoginUser {
+		c.Error(httputil.NewError(http.StatusUnauthorized, "ReturnRentalCar: failed to pay rental car", errors.New("only authorize user can do this action")))
+		return
+	}
+
 	payment.PaymentDate = time.Now().Format("2006-01-02")
 	// payment.TotalPrice = CalculateTotalPrice(payment, rental)
 	payment.TotalPrice = helpers.CalculateTotalPrice(payment, rental)
@@ -177,6 +183,12 @@ func (cs *CarService) ReturnRentalCar(c *gin.Context) {
 	}
 	if res.Error != nil {
 		c.Error(httputil.NewError(http.StatusInternalServerError, "ReturnRentalCar: failed to get rental", res.Error))
+		return
+	}
+
+	isLoginUser := helpers.CheckAuthorizeUser(int(c.GetFloat64("user_id")), rental.UserID)
+	if !isLoginUser {
+		c.Error(httputil.NewError(http.StatusUnauthorized, "ReturnRentalCar: failed to return rental car", errors.New("only authorize user can do this action")))
 		return
 	}
 
