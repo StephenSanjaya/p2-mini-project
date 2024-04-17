@@ -106,9 +106,28 @@ func (cs *CarService) RentalCar(c *gin.Context) {
 		return
 	}
 
+	user, err := helpers.GetCurrentUser(cs.db, rentalAndPay.Rental.UserID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	car, err := helpers.GetCarByID(cs.db, rentalAndPay.Rental.CarID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	invoiceRes, errInvoice := helpers.CreateInvoicePayment(rentalAndPay, user, car)
+	if errInvoice != nil {
+		c.Error(httputil.NewError(http.StatusInternalServerError, "RentalCar: failed to create invoice", errInvoice))
+		return
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message":    "success rental a car",
 		"rental_car": rentalAndPay,
+		"invoice":    invoiceRes,
 	})
 }
 
@@ -219,8 +238,13 @@ func (cs *CarService) ReturnRentalCar(c *gin.Context) {
 		c.Error(httputil.NewError(http.StatusInternalServerError, "ReturnRentalCar: failed to get payment status", res.Error))
 		return
 	}
-	if paymentStatus != "pending" {
-		c.Error(httputil.NewError(http.StatusBadRequest, "ReturnRentalCar: already paid", errors.New("payment status already settlement")))
+	car, err := helpers.GetCarByID(cs.db, rental.CarID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	if car.Status == "available" {
+		c.Error(httputil.NewError(http.StatusBadRequest, "ReturnRentalCar: car already return", errors.New("car already return")))
 		return
 	}
 
