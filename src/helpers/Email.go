@@ -36,10 +36,18 @@ func SendSuccessRegister(email string) {
 	)
 }
 
-func SendSuccessPayment(email string, url string) {
+func SendSuccessRental(email string, url string) {
 	SendMail(
 		email,
-		"Payment success",
-		fmt.Sprintf("invoice url: <b>%s<b>", url),
+		"Rental success",
+		fmt.Sprintf("invoice rental url: <b>%s<b>", url),
+	)
+}
+
+func SendSuccessTopUp(email string, url string) {
+	SendMail(
+		email,
+		"Topup success",
+		fmt.Sprintf("invoice top up url: <b>%s<b>", url),
 	)
 }

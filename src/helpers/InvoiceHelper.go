@@ -5,17 +5,16 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"p2-mini-project/src/dto"
 	"p2-mini-project/src/entity"
 )
 
-func CreateInvoicePayment(rap *dto.RentalAndPayment, user *entity.User, car *entity.Car) (*entity.Invoice, error) {
+func CreateInvoiceRental(totalPrice *float64, user *entity.User, car *entity.Car) (*entity.Invoice, error) {
 	apiKey := os.Getenv("XENDIT_API_KEY")
 	apiUrl := "https://api.xendit.co/v2/invoices"
 
 	bodyRequest := map[string]interface{}{
 		"external_id":      "1",
-		"amount":           rap.Payment.TotalPrice,
+		"amount":           totalPrice,
 		"description":      "Dummy Invoice Mini Project",
 		"invoice_duration": 86400,
 		"customer": map[string]interface{}{

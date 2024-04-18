@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetCurrentUser(db *gorm.DB, user_id int) (*entity.User, *httputil.HTTPError) {
+func GetUserByID(db *gorm.DB, user_id int) (*entity.User, *httputil.HTTPError) {
 	user := new(entity.User)
 
 	if res := db.Where("user_id = ?", user_id).First(&user); res.Error != nil {
