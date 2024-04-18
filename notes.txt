@@ -1,4 +1,4 @@
-- Web API dapat diakses pada _________ (isi dengan url hasil deployment anda).
+- Web API dapat diakses pada https://tranquil-dawn-18450-e961ca3b239f.herokuapp.com/
 - Web API memiliki endpoint sebagai berikut: 
   - <b>POST</b> /api/v1/users/register
     - request body -> `{ fullname, address, email, password }`
