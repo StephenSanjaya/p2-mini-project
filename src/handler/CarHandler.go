@@ -87,8 +87,8 @@ func (cs *CarService) GetAllCarsByCategory(c *gin.Context) {
 // @Tags 	 Car
 // @Accept   json
 // @Produce  json
-// @Param rental body dto.RentalAndPayment true "user rent a car"
-// @Success 201 {object} object{message=string,rental_car=dto.RentalAndPayment,invoice=entity.Invoice}
+// @Param rental body dto.Rental true "user rent a car"
+// @Success 201 {object} object{message=string,rental=entity.Rental,invoice=entity.Invoice}
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 401 {object} httputil.HTTPError
 // @Failure 404 {object} httputil.HTTPError
@@ -159,12 +159,12 @@ func (cs *CarService) RentalCar(c *gin.Context) {
 // @Produce  json
 // @Param    pay    query     int  true  "pay rental car by rental_id"
 // @Param pay body dto.Payment true "user pay rented a car"
-// @Success 200 {object} object{message=string,payment=dto.Payment}
+// @Success 200 {object} object{message=string,payment=entity.Payment}
 // @Failure 401 {object} httputil.HTTPError
 // @Failure 400 {object} httputil.HTTPError
 // @Failure 404 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
-// @Router /cars/pay/{payment_id} [post]
+// @Router /cars/pay/{rental_id} [post]
 func (cs *CarService) PayRentalCar(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 
