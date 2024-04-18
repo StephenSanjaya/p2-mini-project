@@ -19,6 +19,18 @@ func NewUserService(db *gorm.DB) *UserService {
 	return &UserService{db: db}
 }
 
+// User godoc
+// @Summary User top up
+// @Description User top up
+// @Tags 	 User
+// @Accept   json
+// @Produce  json
+// @Param car body dto.TopUp true "top up"
+// @Success 201 {object} object{message=string,invoice=entity.Invoice}
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /users/topup [post]
 func (us *UserService) TopUp(c *gin.Context) {
 
 	topup := new(dto.TopUp)

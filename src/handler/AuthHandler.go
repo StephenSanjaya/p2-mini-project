@@ -19,6 +19,17 @@ func NewAuthService(db *gorm.DB) *AuthService {
 	return &AuthService{db: db}
 }
 
+// Auth godoc
+// @Summary Create Users
+// @Description Create new users
+// @Tags 	 User
+// @Accept   json
+// @Produce  json
+// @Param user body dto.User true "Create new user"
+// @Success 201 {object} object{message=string,user=entity.User}
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /users/register [post]
 func (as *AuthService) RegisterHandler(c *gin.Context) {
 	user := new(dto.User)
 
@@ -46,6 +57,18 @@ func (as *AuthService) RegisterHandler(c *gin.Context) {
 	})
 }
 
+// Auth godoc
+// @Summary User login
+// @Description User do login
+// @Tags 	 User
+// @Accept   json
+// @Produce  json
+// @Param user body dto.Login true "login user"
+// @Success 200 {object} object{message=string,token=string}
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 404 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /users/login [post]
 func (as *AuthService) LoginHandler(c *gin.Context) {
 	login := new(dto.Login)
 

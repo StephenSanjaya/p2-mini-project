@@ -21,6 +21,18 @@ func NewAdminService(db *gorm.DB) *AdminService {
 	return &AdminService{db: db}
 }
 
+// Admin godoc
+// @Summary Create car
+// @Description Create new car
+// @Tags 	 Admin
+// @Accept   json
+// @Produce  json
+// @Param car body dto.Car true "Create new car"
+// @Success 201 {object} object{message=string,car=entity.Car}
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /admin/cars [post]
 func (as *AdminService) CreateNewCar(c *gin.Context) {
 	car := new(entity.Car)
 
@@ -41,6 +53,20 @@ func (as *AdminService) CreateNewCar(c *gin.Context) {
 	})
 }
 
+// Admin godoc
+// @Summary Update car
+// @Description Update car by id
+// @Tags 	 Admin
+// @Accept   json
+// @Produce  json
+// @Param    car    query     int  true  "car update by car_id"
+// @Param car body dto.Car true "Update car"
+// @Success 200 {object} object{message=string,car=entity.Car}
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 404 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /admin/cars/{car_id} [put]
 func (as *AdminService) UpdateCar(c *gin.Context) {
 	car_id := c.Param("car_id")
 
@@ -70,6 +96,18 @@ func (as *AdminService) UpdateCar(c *gin.Context) {
 	})
 }
 
+// Admin godoc
+// @Summary Delete car
+// @Description Delete car by id
+// @Tags 	 Admin
+// @Accept   json
+// @Produce  json
+// @Param    car    query     int  true  "car delete by car_id"
+// @Success 200 {object} object{message=string}
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 404 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /admin/cars/{car_id} [delete]
 func (as *AdminService) DeleteCar(c *gin.Context) {
 	car_id := c.Param("car_id")
 
@@ -89,6 +127,15 @@ func (as *AdminService) DeleteCar(c *gin.Context) {
 	})
 }
 
+// Admin godoc
+// @Summary Get all users
+// @Description Get all users
+// @Tags 	 Admin
+// @Produce  json
+// @Success 200 {object} object{message=string,users=[]entity.User}
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /admin/users [get]
 func (as *AdminService) GetAllUsers(c *gin.Context) {
 	users := new([]entity.User)
 
@@ -104,6 +151,15 @@ func (as *AdminService) GetAllUsers(c *gin.Context) {
 	})
 }
 
+// Admin godoc
+// @Summary Get rental history
+// @Description Get rental history
+// @Tags 	 Admin
+// @Produce  json
+// @Success 200 {object} object{message=string,rental_history=[]dto.RentalHistory}
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /admin/rental-history [get]
 func (as *AdminService) GetRentalHistory(c *gin.Context) {
 	history := new([]dto.RentalHistory)
 

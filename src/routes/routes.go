@@ -2,10 +2,13 @@ package routes
 
 import (
 	"os"
+	"p2-mini-project/docs"
 	"p2-mini-project/src/handler"
 	"p2-mini-project/src/middleware"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 )
 
@@ -49,6 +52,9 @@ func Routes(db *gorm.DB) {
 			admin.GET("/rental-history", adminService.GetRentalHistory)
 		}
 	}
+
+	docs.SwaggerInfo.BasePath = "/"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	port := os.Getenv("PORT")
 	if port == "" {

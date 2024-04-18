@@ -1,0 +1,648 @@
+basePath: /api/v1
+definitions:
+  dto.Car:
+    properties:
+      capacity:
+        type: number
+      category_id:
+        type: integer
+      name:
+        type: string
+      rental_cost_per_day:
+        type: number
+    type: object
+  dto.CarRentalHistory:
+    properties:
+      name:
+        type: string
+    type: object
+  dto.Login:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.Payment:
+    properties:
+      coupon_id:
+        type: integer
+      payment_date:
+        type: string
+      payment_method_id:
+        type: integer
+      payment_status:
+        type: string
+      rental_id:
+        type: integer
+      total_price:
+        type: number
+    required:
+    - payment_method_id
+    type: object
+  dto.Rental:
+    properties:
+      car_id:
+        type: integer
+      price:
+        type: number
+      rental_date:
+        type: string
+      rental_id:
+        type: integer
+      return_date:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - car_id
+    - rental_date
+    - return_date
+    type: object
+  dto.RentalAndPayment:
+    properties:
+      payment:
+        $ref: '#/definitions/dto.Payment'
+      rental:
+        $ref: '#/definitions/dto.Rental'
+    type: object
+  dto.RentalHistory:
+    properties:
+      car:
+        $ref: '#/definitions/dto.CarRentalHistory'
+      car_id:
+        type: integer
+      rental_date:
+        type: string
+      rental_id:
+        type: integer
+      return_date:
+        type: string
+      total_price:
+        type: number
+      user:
+        $ref: '#/definitions/dto.UserRentalHistory'
+      user_id:
+        type: integer
+    type: object
+  dto.TopUp:
+    properties:
+      amount:
+        type: number
+    type: object
+  dto.User:
+    properties:
+      address:
+        type: string
+      deposit:
+        type: number
+      email:
+        type: string
+      fullname:
+        type: string
+    required:
+    - address
+    - email
+    - fullname
+    type: object
+  dto.UserRentalHistory:
+    properties:
+      address:
+        type: string
+      fullname:
+        type: string
+    type: object
+  entity.Car:
+    properties:
+      capacity:
+        type: number
+      car_id:
+        type: integer
+      category_id:
+        type: integer
+      name:
+        type: string
+      rental_cost_per_day:
+        type: number
+      status:
+        type: string
+    type: object
+  entity.Invoice:
+    properties:
+      id:
+        type: string
+      invoice_url:
+        type: string
+    type: object
+  entity.User:
+    properties:
+      address:
+        type: string
+      deposit:
+        type: number
+      email:
+        type: string
+      fullname:
+        type: string
+      role:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  httputil.HTTPError:
+    properties:
+      detail:
+        type: string
+      message:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact:
+    email: stephen@email.com
+    name: stephen
+  description: This is a rental car api docs
+  title: Mini Project - Rental Car
+  version: "1.0"
+paths:
+  /admin/cars:
+    post:
+      consumes:
+      - application/json
+      description: Create new car
+      parameters:
+      - description: Create new car
+        in: body
+        name: car
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Car'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            properties:
+              car:
+                $ref: '#/definitions/entity.Car'
+              message:
+                type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Create car
+      tags:
+      - Admin
+  /admin/cars/{car_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete car by id
+      parameters:
+      - description: car delete by car_id
+        in: query
+        name: car
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Delete car
+      tags:
+      - Admin
+    put:
+      consumes:
+      - application/json
+      description: Update car by id
+      parameters:
+      - description: car update by car_id
+        in: query
+        name: car
+        required: true
+        type: integer
+      - description: Update car
+        in: body
+        name: car
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Car'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              car:
+                $ref: '#/definitions/entity.Car'
+              message:
+                type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Update car
+      tags:
+      - Admin
+  /admin/rental-history:
+    get:
+      description: Get rental history
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+              rental_history:
+                items:
+                  $ref: '#/definitions/dto.RentalHistory'
+                type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Get rental history
+      tags:
+      - Admin
+  /admin/users:
+    get:
+      description: Get all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+              users:
+                items:
+                  $ref: '#/definitions/entity.User'
+                type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Get all users
+      tags:
+      - Admin
+  /cars:
+    get:
+      description: Get all cars
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              cars:
+                items:
+                  $ref: '#/definitions/entity.Car'
+                type: array
+              message:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Get all cars
+      tags:
+      - Car
+    post:
+      consumes:
+      - application/json
+      description: Rent a car
+      parameters:
+      - description: user rent a car
+        in: body
+        name: rental
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RentalAndPayment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            properties:
+              invoice:
+                $ref: '#/definitions/entity.Invoice'
+              message:
+                type: string
+              rental_car:
+                $ref: '#/definitions/dto.RentalAndPayment'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Rent a car
+      tags:
+      - Car
+  /cars/{category_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get cars by category id
+      parameters:
+      - description: cars search by category_id
+        in: query
+        name: category
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              cars:
+                items:
+                  $ref: '#/definitions/entity.Car'
+                type: array
+              message:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Get cars by category
+      tags:
+      - Car
+  /cars/pay/{payment_id}:
+    post:
+      consumes:
+      - application/json
+      description: Pay rented car
+      parameters:
+      - description: pay rental car by rental_id
+        in: query
+        name: rental
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+              payment:
+                $ref: '#/definitions/dto.Payment'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Pay rented car
+      tags:
+      - Car
+  /cars/return/{rental_id}:
+    post:
+      consumes:
+      - application/json
+      description: Return rented car
+      parameters:
+      - description: return rental car by rental_id
+        in: query
+        name: rental
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Return rented car
+      tags:
+      - Car
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: User do login
+      parameters:
+      - description: login user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+              token:
+                type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: User login
+      tags:
+      - User
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Create new users
+      parameters:
+      - description: Create new user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            properties:
+              message:
+                type: string
+              user:
+                $ref: '#/definitions/entity.User'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: Create Users
+      tags:
+      - User
+  /users/topup:
+    post:
+      consumes:
+      - application/json
+      description: User top up
+      parameters:
+      - description: top up
+        in: body
+        name: car
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TopUp'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            properties:
+              invoice:
+                $ref: '#/definitions/entity.Invoice'
+              message:
+                type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
+      summary: User top up
+      tags:
+      - User
+swagger: "2.0"

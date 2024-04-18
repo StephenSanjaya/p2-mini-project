@@ -22,6 +22,15 @@ func NewCarService(db *gorm.DB) *CarService {
 	return &CarService{db: db}
 }
 
+// Car godoc
+// @Summary Get all cars
+// @Description Get all cars
+// @Tags 	 Car
+// @Produce  json
+// @Success 200 {object} object{message=string,cars=[]entity.Car}
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /cars [get]
 func (cs *CarService) GetAllCars(c *gin.Context) {
 	cars := new([]entity.Car)
 
@@ -36,6 +45,18 @@ func (cs *CarService) GetAllCars(c *gin.Context) {
 	})
 }
 
+// Car godoc
+// @Summary Get cars by category
+// @Description Get cars by category id
+// @Tags 	 Car
+// @Accept   json
+// @Produce  json
+// @Param    category    query     int  true  "cars search by category_id"
+// @Success 200 {object} object{message=string,cars=[]entity.Car}
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 404 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /cars/{category_id} [get]
 func (cs *CarService) GetAllCarsByCategory(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 
@@ -59,6 +80,19 @@ func (cs *CarService) GetAllCarsByCategory(c *gin.Context) {
 	})
 }
 
+// Car godoc
+// @Summary Rent a car
+// @Description Rent a car
+// @Tags 	 Car
+// @Accept   json
+// @Produce  json
+// @Param rental body dto.RentalAndPayment true "user rent a car"
+// @Success 201 {object} object{message=string,rental_car=dto.RentalAndPayment,invoice=entity.Invoice}
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 404 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /cars [post]
 func (cs *CarService) RentalCar(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 
@@ -133,6 +167,18 @@ func (cs *CarService) RentalCar(c *gin.Context) {
 	})
 }
 
+// Car godoc
+// @Summary Pay rented car
+// @Description Pay rented car
+// @Tags 	 Car
+// @Accept   json
+// @Produce  json
+// @Param    rental    query     int  true  "pay rental car by rental_id"
+// @Success 200 {object} object{message=string,payment=dto.Payment}
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 404 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /cars/pay/{payment_id} [post]
 func (cs *CarService) PayRentalCar(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 
@@ -214,6 +260,18 @@ func (cs *CarService) PayRentalCar(c *gin.Context) {
 	})
 }
 
+// Car godoc
+// @Summary Return rented car
+// @Description Return rented car
+// @Tags 	 Car
+// @Accept   json
+// @Produce  json
+// @Param    rental    query     int  true  "return rental car by rental_id"
+// @Success 200 {object} object{message=string}
+// @Failure 401 {object} httputil.HTTPError
+// @Failure 404 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /cars/return/{rental_id} [post]
 func (cs *CarService) ReturnRentalCar(c *gin.Context) {
 	rental_id := c.Param("rental_id")
 
