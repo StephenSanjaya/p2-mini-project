@@ -42,7 +42,7 @@ func (us *UserService) TopUp(c *gin.Context) {
 
 	user_id := int(c.GetFloat64("user_id"))
 
-	user, err := helpers.GetCurrentUser(us.db, user_id)
+	user, err := helpers.GetUserByID(us.db, user_id)
 	if err != nil {
 		c.Error(err)
 	}
@@ -58,6 +58,8 @@ func (us *UserService) TopUp(c *gin.Context) {
 		c.Error(httputil.NewError(http.StatusInternalServerError, "TopUp: failed to create invoice", errInvoice))
 		return
 	}
+
+	helpers.SendSuccessTopUp(user.Email, invoiceRes.InvoiceUrl)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success top up",
