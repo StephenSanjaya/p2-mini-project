@@ -3,7 +3,7 @@ package httputil
 import "fmt"
 
 type HTTPError struct {
-	Code    int    `json:"code"`
+	Code    int    `json:"code" swaggerignore:"true"`
 	Message string `json:"message"`
 	Detail  string `json:"detail"`
 }
