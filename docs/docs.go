@@ -351,7 +351,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RentalAndPayment"
+                            "$ref": "#/definitions/dto.Rental"
                         }
                     }
                 ],
@@ -367,8 +367,8 @@ const docTemplate = `{
                                 "message": {
                                     "type": "string"
                                 },
-                                "rental_car": {
-                                    "$ref": "#/definitions/dto.RentalAndPayment"
+                                "rental": {
+                                    "$ref": "#/definitions/entity.Rental"
                                 }
                             }
                         }
@@ -400,7 +400,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cars/pay/{payment_id}": {
+        "/cars/pay/{rental_id}": {
             "post": {
                 "description": "Pay rented car",
                 "consumes": [
@@ -417,9 +417,18 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "pay rental car by rental_id",
-                        "name": "rental",
+                        "name": "pay",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "description": "user pay rented a car",
+                        "name": "pay",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.Payment"
+                        }
                     }
                 ],
                 "responses": {
@@ -432,9 +441,15 @@ const docTemplate = `{
                                     "type": "string"
                                 },
                                 "payment": {
-                                    "$ref": "#/definitions/dto.Payment"
+                                    "$ref": "#/definitions/entity.Payment"
                                 }
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.HTTPError"
                         }
                     },
                     "401": {
@@ -796,23 +811,8 @@ const docTemplate = `{
                 "payment_method_id"
             ],
             "properties": {
-                "coupon_id": {
-                    "type": "integer"
-                },
-                "payment_date": {
-                    "type": "string"
-                },
                 "payment_method_id": {
                     "type": "integer"
-                },
-                "payment_status": {
-                    "type": "string"
-                },
-                "rental_id": {
-                    "type": "integer"
-                },
-                "total_price": {
-                    "type": "number"
                 }
             }
         },
@@ -827,31 +827,14 @@ const docTemplate = `{
                 "car_id": {
                     "type": "integer"
                 },
-                "price": {
-                    "type": "number"
+                "coupon_id": {
+                    "type": "integer"
                 },
                 "rental_date": {
                     "type": "string"
                 },
-                "rental_id": {
-                    "type": "integer"
-                },
                 "return_date": {
                     "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.RentalAndPayment": {
-            "type": "object",
-            "properties": {
-                "payment": {
-                    "$ref": "#/definitions/dto.Payment"
-                },
-                "rental": {
-                    "$ref": "#/definitions/dto.Rental"
                 }
             }
         },
@@ -956,6 +939,49 @@ const docTemplate = `{
                 },
                 "invoice_url": {
                     "type": "string"
+                }
+            }
+        },
+        "entity.Payment": {
+            "type": "object",
+            "properties": {
+                "payment_date": {
+                    "type": "string"
+                },
+                "payment_method_id": {
+                    "type": "integer"
+                },
+                "payment_status": {
+                    "type": "string"
+                },
+                "rental_id": {
+                    "type": "integer"
+                },
+                "total_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "entity.Rental": {
+            "type": "object",
+            "properties": {
+                "car_id": {
+                    "type": "integer"
+                },
+                "coupon_id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "rental_date": {
+                    "type": "string"
+                },
+                "return_date": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },

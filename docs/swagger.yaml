@@ -28,18 +28,8 @@ definitions:
     type: object
   dto.Payment:
     properties:
-      coupon_id:
-        type: integer
-      payment_date:
-        type: string
       payment_method_id:
         type: integer
-      payment_status:
-        type: string
-      rental_id:
-        type: integer
-      total_price:
-        type: number
     required:
     - payment_method_id
     type: object
@@ -47,27 +37,16 @@ definitions:
     properties:
       car_id:
         type: integer
-      price:
-        type: number
+      coupon_id:
+        type: integer
       rental_date:
         type: string
-      rental_id:
-        type: integer
       return_date:
         type: string
-      user_id:
-        type: integer
     required:
     - car_id
     - rental_date
     - return_date
-    type: object
-  dto.RentalAndPayment:
-    properties:
-      payment:
-        $ref: '#/definitions/dto.Payment'
-      rental:
-        $ref: '#/definitions/dto.Rental'
     type: object
   dto.RentalHistory:
     properties:
@@ -136,6 +115,34 @@ definitions:
         type: string
       invoice_url:
         type: string
+    type: object
+  entity.Payment:
+    properties:
+      payment_date:
+        type: string
+      payment_method_id:
+        type: integer
+      payment_status:
+        type: string
+      rental_id:
+        type: integer
+      total_price:
+        type: number
+    type: object
+  entity.Rental:
+    properties:
+      car_id:
+        type: integer
+      coupon_id:
+        type: integer
+      price:
+        type: number
+      rental_date:
+        type: string
+      return_date:
+        type: string
+      user_id:
+        type: integer
     type: object
   entity.User:
     properties:
@@ -384,7 +391,7 @@ paths:
         name: rental
         required: true
         schema:
-          $ref: '#/definitions/dto.RentalAndPayment'
+          $ref: '#/definitions/dto.Rental'
       produces:
       - application/json
       responses:
@@ -396,8 +403,8 @@ paths:
                 $ref: '#/definitions/entity.Invoice'
               message:
                 type: string
-              rental_car:
-                $ref: '#/definitions/dto.RentalAndPayment'
+              rental:
+                $ref: '#/definitions/entity.Rental'
             type: object
         "400":
           description: Bad Request
@@ -458,7 +465,7 @@ paths:
       summary: Get cars by category
       tags:
       - Car
-  /cars/pay/{payment_id}:
+  /cars/pay/{rental_id}:
     post:
       consumes:
       - application/json
@@ -466,9 +473,15 @@ paths:
       parameters:
       - description: pay rental car by rental_id
         in: query
-        name: rental
+        name: pay
         required: true
         type: integer
+      - description: user pay rented a car
+        in: body
+        name: pay
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Payment'
       produces:
       - application/json
       responses:
@@ -479,8 +492,12 @@ paths:
               message:
                 type: string
               payment:
-                $ref: '#/definitions/dto.Payment'
+                $ref: '#/definitions/entity.Payment'
             type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.HTTPError'
         "401":
           description: Unauthorized
           schema:
