@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"p2-mini-project/src/entity"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -29,6 +30,12 @@ func GetConnection() *gorm.DB {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database")
+		return nil
+	}
+
+	err = db.AutoMigrate(&entity.PaymentMethod{}, &entity.Coupon{}, &entity.Category{}, &entity.Car{}, &entity.User{}, &entity.Rental{}, &entity.Payment{})
+	if err != nil {
+		log.Fatal("Failed to auto migrate db: ", err)
 		return nil
 	}
 
