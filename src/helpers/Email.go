@@ -51,3 +51,11 @@ func SendSuccessTopUp(email string, url string) {
 		fmt.Sprintf("invoice top up url: <b>%s<b>", url),
 	)
 }
+
+func SendSuccessPayment(email string, total_price float64) {
+	SendMail(
+		email,
+		"Payment success",
+		fmt.Sprintf("success paid with amount of <b>Rp. %.2f<b>", total_price),
+	)
+}
