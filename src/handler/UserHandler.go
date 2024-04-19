@@ -45,12 +45,14 @@ func (us *UserService) TopUp(c *gin.Context) {
 	user, err := helpers.GetUserByID(us.db, user_id)
 	if err != nil {
 		c.Error(err)
+		return
 	}
 
 	updatedDeposit := user.Deposit + topup.Amount
 
 	if res := us.db.Model(&entity.User{}).Where("user_id = ?", user_id).Update("deposit", updatedDeposit); res.Error != nil {
 		c.Error(httputil.NewError(http.StatusInternalServerError, "TopUp: failed to top up", res.Error))
+		return
 	}
 
 	invoiceRes, errInvoice := helpers.CreateInvoiceTopUp(user, topup.Amount)
