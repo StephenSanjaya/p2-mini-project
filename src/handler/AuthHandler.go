@@ -47,7 +47,12 @@ func (as *AuthService) RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	helpers.SendSuccessRegister(user.Email)
+	scheme := "http"
+	if c.Request.TLS != nil {
+		scheme = "https"
+	}
+	url := scheme + "://" + c.Request.Host + c.Request.URL.Path + "?user=" + user.Fullname
+	helpers.SendSuccessRegister(user.Email, url)
 
 	user.Password = ""
 

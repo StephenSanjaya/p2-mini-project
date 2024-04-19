@@ -28,11 +28,11 @@ func SendMail(email, subject, content string) {
 	}
 }
 
-func SendSuccessRegister(email string) {
+func SendSuccessRegister(email string, url string) {
 	SendMail(
 		email,
 		"Register success",
-		"Register success",
+		fmt.Sprintf("Register success with url: <b>%s<b>", url),
 	)
 }
 
