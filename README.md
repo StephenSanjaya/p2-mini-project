@@ -1,7 +1,7 @@
 # rental-car
 
 - ERD
-  ![erd rental car](https://github.com/StephenSanjaya/p2-mini-project/blob/dev/stephen/car_rental_erd.png)
+  ![erd rental car](https://github.com/StephenSanjaya/p2-mini-project/blob/dev/stephen/car_rental_erd.jpg)
 
 - Web API dapat diakses pada https://tranquil-dawn-18450-e961ca3b239f.herokuapp.com/
 - Swagger doc dapat diakses pada https://tranquil-dawn-18450-e961ca3b239f.herokuapp.com/swagger/index.html
