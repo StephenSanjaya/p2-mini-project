@@ -28,11 +28,11 @@ func SendMail(email, subject, content string) {
 	}
 }
 
-func SendSuccessRegister(email string) {
+func SendSuccessRegister(email string, url string) {
 	SendMail(
 		email,
 		"Register success",
-		"Register success",
+		fmt.Sprintf("Register success with url: <b>%s<b>", url),
 	)
 }
 
@@ -49,5 +49,13 @@ func SendSuccessTopUp(email string, url string) {
 		email,
 		"Topup success",
 		fmt.Sprintf("invoice top up url: <b>%s<b>", url),
+	)
+}
+
+func SendSuccessPayment(email string, total_price float64) {
+	SendMail(
+		email,
+		"Payment success",
+		fmt.Sprintf("success paid with amount of <b>Rp. %.2f<b>", total_price),
 	)
 }

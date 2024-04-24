@@ -82,14 +82,6 @@ func GetPrice(cs *gorm.DB, r *dto.Rental) (float64, *httputil.HTTPError) {
 	return price, nil
 }
 
-func GetUserDeposit(cs *gorm.DB, user_id int) (float64, *httputil.HTTPError) {
-	deposit := 0.0
-	if res := cs.Table("users").Select("deposit").Where("user_id = ?", user_id).Scan(&deposit); res.Error != nil {
-		return -1, httputil.NewError(http.StatusInternalServerError, "GetUserDeposit: fail to get deposit user", res.Error)
-	}
-	return deposit, nil
-}
-
 func CheckCarStatus(cs *gorm.DB, car_id int) *httputil.HTTPError {
 	status := ""
 	if res := cs.Model(&entity.Car{}).Where("car_id = ?", car_id).Select("status").First(&status); res.Error != nil {

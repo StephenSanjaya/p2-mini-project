@@ -235,6 +235,14 @@ func (cs *CarService) PayRentalCar(c *gin.Context) {
 		return
 	}
 
+	email, err := helpers.GetUserEmail(cs.db, rental.UserID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	helpers.SendSuccessPayment(email, payment.TotalPrice)
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "success pay rental car",
 		"payment": payment,
