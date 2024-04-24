@@ -1,7 +1,6 @@
 # rental-car
 
-- tech stackaa
-  Go - Gin - PostgreSQL - GORM - Swaggo - Heroku
+- tech stack: Go - Gin - PostgreSQL - GORM - Swaggo - Heroku
 
 - ERD
   ![erd rental car](https://github.com/StephenSanjaya/p2-mini-project/blob/dev/stephen/car_rental_erd.jpg)
